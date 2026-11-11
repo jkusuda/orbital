@@ -41,6 +41,10 @@ type OrbitalData struct {
 	MeanAnomaly   float64 `json:"mean_anomaly,string"`
 }
 
+type feedResponse struct {
+	NearEarthObjects map[string][]Asteroid `json:"near_earth_objects"`
+}
+
 func NewClient(key string) *Client {
 	return &Client{
 		key:     key,
@@ -52,6 +56,7 @@ func NewClient(key string) *Client {
 }
 
 func (c *Client) GetNEO(id string) (*Asteroid, error) {
+	// https://api.nasa.gov/neo/rest/v1/neo/3542519?api_key=DEMO_KEY
 	params := url.Values{}
 	params.Set("api_key", c.key)
 	fullURL := c.baseURL + "/neo/" + id + "?" + params.Encode()
@@ -71,4 +76,34 @@ func (c *Client) GetNEO(id string) (*Asteroid, error) {
 		return nil, err
 	}
 	return &asteroid, nil
+}
+
+func (c *Client) GetFeed(start string, end string) ([]Asteroid, error) {
+	// https://api.nasa.gov/neo/rest/v1/feed?start_date=START_DATE&end_date=END_DATE&api_key=API_KEY
+	params := url.Values{}
+	params.Set("start_date", start)
+	params.Set("end_date", end)
+	params.Set("api_key", c.key)
+	fullURL := c.baseURL + "/feed?" + params.Encode()
+
+	resp, err := c.httpClient.Get(fullURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("nasa: unexpected status %d", resp.StatusCode)
+	}
+
+	var feed feedResponse
+	if err := json.NewDecoder(resp.Body).Decode(&feed); err != nil {
+		return nil, err
+	}
+
+	var asteroids []Asteroid
+	for _, day := range feed.NearEarthObjects {
+		asteroids = append(asteroids, day...)
+	}
+	return asteroids, nil
 }

@@ -21,4 +21,17 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("%+v\n", asteroid)
+
+	asteroids, err := client.GetFeed("2026-11-11", "2026-11-11")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for _, a := range asteroids {
+		neo, err := client.GetNEO(a.ID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(neo)
+	}
 }
