@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jkusuda/orbital/backend/internal/nasa"
+	"github.com/jkusuda/orbital/backend/internal/orbit"
 )
 
 func main() {
@@ -21,6 +23,9 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("%+v\n", asteroid)
+	t := time.Date(2026, 11, 11, 0, 0, 0, 0, time.UTC)
+	p := orbit.Position(toElements(asteroid.OrbitalData), t)
+	fmt.Printf("%.6f %.6f %.6f\n", p.X, p.Y, p.Z)
 
 	asteroids, err := client.GetFeed("2026-11-11", "2026-11-11")
 	if err != nil {
@@ -32,6 +37,20 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(neo)
+		t := time.Date(2026, 11, 11, 0, 0, 0, 0, time.UTC)
+		p := orbit.Position(toElements(neo.OrbitalData), t)
+		fmt.Printf("%.6f %.6f %.6f\n", p.X, p.Y, p.Z)
+	}
+}
+
+func toElements(od nasa.OrbitalData) orbit.Elements {
+	return orbit.Elements{
+		Epoch:         od.Epoch,
+		Eccentricity:  od.Eccentricity,
+		SemiMajorAxis: od.SemiMajorAxis,
+		Inclination:   od.Inclination,
+		AscendingNode: od.AscendingNode,
+		PerihelionArg: od.PerihelionArg,
+		MeanAnomaly:   od.MeanAnomaly,
 	}
 }
