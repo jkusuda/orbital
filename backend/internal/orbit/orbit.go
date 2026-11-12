@@ -84,3 +84,29 @@ func rotate(x, y float64, el Elements) Vec3 {
 		Z: (sinw*sini)*x + (cosw*sini)*y,
 	}
 }
+
+func EarthPosition(t time.Time) Vec3 {
+	jd := julianDate(t)
+	T := (jd - 2451545.0) / 36525 // centuries since J2000
+
+	a := 1.00000261 + 0.00000562*T
+	e := 0.01671123 - 0.00004392*T
+	i := -0.00001531 - 0.01294668*T
+	L := 100.46457166 + 35999.37244981*T // mean longitude
+	peri := 102.93768193 + 0.32327364*T  // longitude of perihelion ϖ
+	node := 0.0                          // Ω
+
+	return Position(Elements{
+		Epoch:         jd,
+		Eccentricity:  e,
+		SemiMajorAxis: a,
+		Inclination:   i,
+		AscendingNode: node,
+		PerihelionArg: peri - node,
+		MeanAnomaly:   L - peri,
+	}, t)
+}
+
+func (v Vec3) Sub(o Vec3) Vec3 {
+	return Vec3{v.X - o.X, v.Y - o.Y, v.Z - o.Z}
+}

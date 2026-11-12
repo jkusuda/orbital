@@ -2,4 +2,4 @@
 export
 
 run:
-	go run ./cmd/orbital
+	go run ./cmd/api
