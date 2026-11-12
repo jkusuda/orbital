@@ -1,0 +1,213 @@
+:root {
+  --hazardous: #ff5a47;
+  --safe: #6ea8ff;
+  --accent: #f2a65a;
+  --text: #f1e9d8;
+  --muted: #9a9486;
+  --surface: #151a24;
+  --surface-raised: #252c3a;
+
+  /* Cut two opposite corners off a box, like a facet. */
+  --cut: 10px;
+  --facet: polygon(
+    var(--cut) 0, 100% 0,
+    100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%,
+    0 100%, 0 var(--cut)
+  );
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #000;
+  color: var(--text);
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+.panel {
+  position: fixed;
+  margin: 0;
+  padding: 12px 16px;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+  clip-path: var(--facet);
+}
+
+.button {
+  --cut: 6px;
+  padding: 6px 14px;
+  border: 0;
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  clip-path: var(--facet);
+}
+
+.button:hover {
+  background: var(--accent);
+  color: #000;
+}
+
+.button.primary {
+  background: var(--accent);
+  color: #000;
+}
+
+.button.primary:hover {
+  background: var(--text);
+}
+
+.title {
+  position: fixed;
+  top: 16px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.title h1 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.info {
+  top: 16px;
+  right: 16px;
+  width: 220px;
+}
+
+.info h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.info dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.info dt {
+  color: var(--muted);
+}
+
+.info dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.info .hazardous {
+  color: var(--hazardous);
+}
+
+.legend {
+  bottom: 16px;
+  left: 16px;
+  list-style: none;
+  color: var(--muted);
+}
+
+.swatch {
+  display: inline-block;
+  width: 11px;
+  height: 10px;
+  margin-right: 8px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.swatch.hazardous {
+  background: var(--hazardous);
+}
+
+.swatch.safe {
+  background: var(--safe);
+}
+
+.time {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.time .button {
+  width: 34px;
+  height: 30px;
+  padding: 0;
+}
+
+.time input {
+  accent-color: var(--accent);
+}
+
+.time output {
+  width: 36px;
+  font-variant-numeric: tabular-nums;
+}
+
+.about {
+  --cut: 18px;
+  inset: 0;
+  margin: auto;
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 24px 28px;
+}
+
+.about::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.about h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.about ul {
+  padding-left: 18px;
+}
+
+.about li {
+  margin: 6px 0;
+}
+
+.about li::marker {
+  color: var(--accent);
+}
+
+.about a:not(.button) {
+  color: var(--accent);
+}
+
+.about-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+/* On narrow screens the legend would collide with the time controls. */
+@media (max-width: 640px) {
+  .legend {
+    bottom: 76px;
+  }
+}

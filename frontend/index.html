@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orbital</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="title">
+      <h1>Orbital</h1>
+      <button id="about-open" class="button">About</button>
+    </header>
+
+    <aside id="info" class="panel info" hidden>
+      <h2 id="info-name"></h2>
+      <dl>
+        <dt>Diameter</dt>
+        <dd id="info-diameter"></dd>
+        <dt>Distance</dt>
+        <dd id="info-distance"></dd>
+        <dt>Status</dt>
+        <dd id="info-status"></dd>
+      </dl>
+    </aside>
+
+    <ul class="panel legend">
+      <li><span class="swatch hazardous"></span>Potentially hazardous</li>
+      <li><span class="swatch safe"></span>Not hazardous</li>
+    </ul>
+
+    <div class="panel time">
+      <button id="pause" class="button" aria-label="Pause">❚❚</button>
+      <input id="speed" type="range" min="0.1" max="5" step="0.1" value="1" aria-label="Speed" />
+      <output id="speed-label">1.0×</output>
+    </div>
+
+    <dialog id="about" class="panel about">
+      <h2>About Orbital</h2>
+      <p>A live 3D view of the asteroids passing near Earth.</p>
+      <ul>
+        <li><strong>NASA API</strong> supplies the near-Earth objects and their orbital elements.</li>
+        <li><strong>Go backend</strong> does the orbital math to turn those elements into positions.</li>
+        <li><strong>three.js frontend</strong> draws it all in your browser.</li>
+      </ul>
+      <p>Check out more of my work at <a href="https://jkusuda.dev" target="_blank" rel="noopener">jkusuda.dev</a>.</p>
+      <form method="dialog" class="about-actions">
+        <a class="button primary" href="https://github.com/jkusuda/orbital" target="_blank" rel="noopener">View on GitHub</a>
+        <button class="button">Close</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

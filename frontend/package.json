@@ -1,0 +1,19 @@
+{
+  "name": "orbital-frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  },
+  "allowScripts": {
+    "fsevents@2.3.3": true
+  }
+}
