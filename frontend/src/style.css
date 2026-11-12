@@ -89,9 +89,32 @@ canvas {
   width: 220px;
 }
 
+.info-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
 .info h2 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 16px;
+}
+
+.info .close {
+  --cut: 4px;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 11px;
+}
+
+.info .more {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
 }
 
 .info dl {
@@ -148,18 +171,60 @@ canvas {
 }
 
 .time .button {
-  width: 34px;
   height: 30px;
+}
+
+.time .icon {
+  width: 34px;
   padding: 0;
 }
 
+.time .speed {
+  min-width: 64px;
+}
+
+.time .live.active {
+  background: var(--accent);
+  color: #000;
+}
+
 .time input {
+  width: 200px;
   accent-color: var(--accent);
 }
 
-.time output {
-  width: 36px;
+.readout {
+  display: grid;
+  min-width: 176px;
   font-variant-numeric: tabular-nums;
+}
+
+.readout .offset {
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.readout .offset.live {
+  color: var(--accent);
+}
+
+.legend .note {
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.status {
+  inset: 0;
+  width: fit-content;
+  height: fit-content;
+  margin: auto;
+  color: var(--muted);
+}
+
+.status[hidden] {
+  display: none;
 }
 
 .about {
@@ -205,9 +270,34 @@ canvas {
   margin-top: 20px;
 }
 
-/* On narrow screens the legend would collide with the time controls. */
-@media (max-width: 640px) {
+/* Below this width the legend would collide with the time controls. */
+@media (max-width: 1100px) {
   .legend {
-    bottom: 76px;
+    bottom: 84px;
+  }
+}
+
+/* Phones: the time controls wrap onto two rows, readout on top. */
+@media (max-width: 680px) {
+  .legend {
+    bottom: 136px;
+  }
+
+  .time {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: calc(100vw - 32px);
+    box-sizing: border-box;
+  }
+
+  .time .readout {
+    width: 100%;
+    text-align: center;
+  }
+
+  .time input {
+    flex: 1;
+    width: auto;
+    min-width: 0;
   }
 }

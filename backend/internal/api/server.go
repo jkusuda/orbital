@@ -19,8 +19,9 @@ func NewServer(asteroids []nasa.Asteroid) *Server {
 
 func (s *Server) Routes() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", s.handleHealth)
-	mux.HandleFunc("GET /positions", s.handlePositions)
+	mux.HandleFunc("GET /api/healthz", s.handleHealth)
+	mux.HandleFunc("GET /api/positions", s.handlePositions)
+	mux.HandleFunc("GET /api/trajectories", s.handleTrajectories)
 	return mux
 }
 

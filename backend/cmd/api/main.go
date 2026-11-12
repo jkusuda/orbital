@@ -16,6 +16,10 @@ func main() {
 	if key == "" {
 		log.Fatal("NASA_API_KEY is not set")
 	}
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	// 2. dependencies
 	client := nasa.NewClient(key)
@@ -26,8 +30,8 @@ func main() {
 	srv := api.NewServer(asteroids)
 
 	// 3. start
-	log.Printf("loaded %d asteroids, listening on :8080", len(asteroids))
-	log.Fatal(http.ListenAndServe(":8080", srv.Routes()))
+	log.Printf("loaded %d asteroids, listening on :%s", len(asteroids), port)
+	log.Fatal(http.ListenAndServe(":"+port, srv.Routes()))
 }
 
 // loadAsteroids fetches this week's feed

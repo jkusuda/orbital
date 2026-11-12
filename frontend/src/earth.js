@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { createFresnelMat } from './fresnelMat.js';
 
-const AXIAL_TILT = THREE.MathUtils.degToRad(23.4);
-const SPIN_RATE = 0.05; // radians per simulated second
+const AXIAL_TILT = THREE.MathUtils.degToRad(23.44);
+const DAY_MS = 86_400_000;
 const DETAIL = 6; // icosahedron subdivisions; lower = chunkier
 const EDGE_INSET = 6; // px to skip at the map's borders, which are white
 
@@ -64,12 +64,18 @@ export async function createEarth() {
 
   const atmosphere = new THREE.Mesh(new THREE.IcosahedronGeometry(1.02, 12), createFresnelMat());
 
+  // The scene is ecliptic-aligned (Y = ecliptic north, X = vernal equinox).
+  // Earth's pole leans 23.44° from Y, about the X axis.
   const earth = new THREE.Group();
-  earth.rotation.z = -AXIAL_TILT;
+  earth.rotation.x = -AXIAL_TILT;
   earth.add(surface, atmosphere);
 
-  earth.userData.update = (t) => {
-    surface.rotation.y = t * SPIN_RATE;
+  // Spins to the real Greenwich sidereal angle at `date` (ms since epoch),
+  // so the day side faces the sun as it actually does.
+  earth.userData.update = (date) => {
+    const jd = date / DAY_MS + 2440587.5;
+    const gmst = THREE.MathUtils.degToRad(280.46061837 + 360.98564736629 * (jd - 2451545.0));
+    surface.rotation.y = gmst - Math.PI; // the map's Greenwich meridian sits at local -x
   };
   return earth;
 }

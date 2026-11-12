@@ -26,7 +26,12 @@ export function createSun(direction) {
   const light = new THREE.DirectionalLight(0xfff4e0, 3);
 
   const sun = new THREE.Group();
-  sun.position.copy(direction).normalize().multiplyScalar(SUN_DISTANCE);
   sun.add(disc, glow, light);
+
+  // Keeps the sun at its true distance, in the direction it really is from Earth.
+  sun.userData.setDirection = (dir) => {
+    sun.position.copy(dir).normalize().multiplyScalar(SUN_DISTANCE);
+  };
+  sun.userData.setDirection(direction);
   return sun;
 }

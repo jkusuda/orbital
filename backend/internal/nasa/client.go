@@ -18,6 +18,7 @@ type Asteroid struct {
 	ID          string            `json:"id"`
 	Name        string            `json:"name"`
 	Hazardous   bool              `json:"is_potentially_hazardous_asteroid"`
+	JPLURL      string            `json:"nasa_jpl_url"`
 	Diameter    EstimatedDiameter `json:"estimated_diameter"`
 	OrbitalData OrbitalData       `json:"orbital_data"`
 }
