@@ -63,17 +63,17 @@ func (c *Client) GetNEO(id string) (*Asteroid, error) {
 
 	resp, err := c.httpClient.Get(fullURL)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("nasa: get neo %s: %w", id, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("nasa: unexpected status %d", resp.StatusCode)
+		return nil, fmt.Errorf("nasa: get neo %s: unexpected status %d", id, resp.StatusCode)
 	}
 
 	var asteroid Asteroid
 	if err := json.NewDecoder(resp.Body).Decode(&asteroid); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("nasa: decode neo %s: %w", id, err)
 	}
 	return &asteroid, nil
 }
@@ -88,17 +88,17 @@ func (c *Client) GetFeed(start string, end string) ([]Asteroid, error) {
 
 	resp, err := c.httpClient.Get(fullURL)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("nasa: get feed %s to %s: %w", start, end, err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("nasa: unexpected status %d", resp.StatusCode)
+		return nil, fmt.Errorf("nasa: get feed %s to %s: unexpected status %d", start, end, resp.StatusCode)
 	}
 
 	var feed feedResponse
 	if err := json.NewDecoder(resp.Body).Decode(&feed); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("nasa: decode feed %s to %s: %w", start, end, err)
 	}
 
 	var asteroids []Asteroid
