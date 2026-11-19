@@ -49,14 +49,17 @@ func (s *Server) handleTrajectories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	asteroids, ok := s.asteroidsApproaching(w, r, start, end)
+	if !ok {
+		return
+	}
+
 	resp := trajectoriesResponse{
 		Times:     make([]time.Time, n),
 		Sun:       make([][3]float64, n),
-		Asteroids: make([]asteroidTrajectory, len(s.asteroids)),
+		Asteroids: make([]asteroidTrajectory, len(asteroids)),
 	}
-	elements := make([]orbit.Elements, len(s.asteroids))
-	for j, a := range s.asteroids {
-		elements[j] = toElements(a.OrbitalData)
+	for j, a := range asteroids {
 		resp.Asteroids[j] = asteroidTrajectory{
 			asteroidInfo: infoOf(a),
 			Points:       make([][3]float64, n),
@@ -68,8 +71,8 @@ func (s *Server) handleTrajectories(w http.ResponseWriter, r *http.Request) {
 		earth := orbit.EarthPosition(t)
 		resp.Times[i] = t
 		resp.Sun[i] = vec(orbit.Vec3{}.Sub(earth))
-		for j, el := range elements {
-			resp.Asteroids[j].Points[i] = vec(orbit.Position(el, t).Sub(earth))
+		for j, a := range asteroids {
+			resp.Asteroids[j].Points[i] = vec(orbit.Position(a.Elements, t).Sub(earth))
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)

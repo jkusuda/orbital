@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/jkusuda/orbital/backend/internal/nasa"
 	"github.com/jkusuda/orbital/backend/internal/orbit"
+	"github.com/jkusuda/orbital/backend/internal/store"
 )
 
 type asteroidInfo struct {
@@ -18,26 +18,8 @@ type asteroidInfo struct {
 	JPLURL     string  `json:"jpl_url"` // JPL Small-Body Database page
 }
 
-func infoOf(a nasa.Asteroid) asteroidInfo {
-	return asteroidInfo{
-		ID:         a.ID,
-		Name:       a.Name,
-		Hazardous:  a.Hazardous,
-		DiameterKm: (a.Diameter.Kilometers.Min + a.Diameter.Kilometers.Max) / 2,
-		JPLURL:     a.JPLURL,
-	}
-}
-
-func toElements(od nasa.OrbitalData) orbit.Elements {
-	return orbit.Elements{
-		Epoch:         od.Epoch,
-		Eccentricity:  od.Eccentricity,
-		SemiMajorAxis: od.SemiMajorAxis,
-		Inclination:   od.Inclination,
-		AscendingNode: od.AscendingNode,
-		PerihelionArg: od.PerihelionArg,
-		MeanAnomaly:   od.MeanAnomaly,
-	}
+func infoOf(a store.Asteroid) asteroidInfo {
+	return asteroidInfo{ID: a.ID, Name: a.Name, Hazardous: a.Hazardous, DiameterKm: a.DiameterKm, JPLURL: a.JPLURL}
 }
 
 func vec(v orbit.Vec3) [3]float64 {

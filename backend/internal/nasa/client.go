@@ -1,7 +1,9 @@
 package nasa
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,12 +17,24 @@ type Client struct {
 }
 
 type Asteroid struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	Hazardous   bool              `json:"is_potentially_hazardous_asteroid"`
-	JPLURL      string            `json:"nasa_jpl_url"`
-	Diameter    EstimatedDiameter `json:"estimated_diameter"`
-	OrbitalData OrbitalData       `json:"orbital_data"`
+	ID              string            `json:"id"`
+	Name            string            `json:"name"`
+	Hazardous       bool              `json:"is_potentially_hazardous_asteroid"`
+	JPLURL          string            `json:"nasa_jpl_url"`
+	Diameter        EstimatedDiameter `json:"estimated_diameter"`
+	OrbitalData     OrbitalData       `json:"orbital_data"`
+	CloseApproaches []CloseApproach   `json:"close_approach_data"`
+}
+
+type CloseApproach struct {
+	EpochMs      int64  `json:"epoch_date_close_approach"` // Unix milliseconds
+	OrbitingBody string `json:"orbiting_body"`
+	MissDistance struct {
+		Km float64 `json:"kilometers,string"`
+	} `json:"miss_distance"`
+	Velocity struct {
+		KmPerSec float64 `json:"kilometers_per_second,string"`
+	} `json:"relative_velocity"`
 }
 
 type EstimatedDiameter struct {
@@ -56,13 +70,27 @@ func NewClient(key string) *Client {
 	}
 }
 
-func (c *Client) GetNEO(id string) (*Asteroid, error) {
+// get sends a GET request that's cancelled if ctx is. Network errors normally
+// include the full URL, which contains the API key, so it's stripped from them.
+func (c *Client) get(ctx context.Context, fullURL string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fullURL, nil)
+	if err != nil {
+		return nil, errors.New("build request")
+	}
+	resp, err := c.httpClient.Do(req)
+	if urlErr, ok := errors.AsType[*url.Error](err); ok {
+		return nil, urlErr.Err
+	}
+	return resp, err
+}
+
+func (c *Client) GetNEO(ctx context.Context, id string) (*Asteroid, error) {
 	// https://api.nasa.gov/neo/rest/v1/neo/3542519?api_key=DEMO_KEY
 	params := url.Values{}
 	params.Set("api_key", c.key)
 	fullURL := c.baseURL + "/neo/" + id + "?" + params.Encode()
 
-	resp, err := c.httpClient.Get(fullURL)
+	resp, err := c.get(ctx, fullURL)
 	if err != nil {
 		return nil, fmt.Errorf("nasa: get neo %s: %w", id, err)
 	}
@@ -79,7 +107,7 @@ func (c *Client) GetNEO(id string) (*Asteroid, error) {
 	return &asteroid, nil
 }
 
-func (c *Client) GetFeed(start string, end string) ([]Asteroid, error) {
+func (c *Client) GetFeed(ctx context.Context, start string, end string) ([]Asteroid, error) {
 	// https://api.nasa.gov/neo/rest/v1/feed?start_date=START_DATE&end_date=END_DATE&api_key=API_KEY
 	params := url.Values{}
 	params.Set("start_date", start)
@@ -87,7 +115,7 @@ func (c *Client) GetFeed(start string, end string) ([]Asteroid, error) {
 	params.Set("api_key", c.key)
 	fullURL := c.baseURL + "/feed?" + params.Encode()
 
-	resp, err := c.httpClient.Get(fullURL)
+	resp, err := c.get(ctx, fullURL)
 	if err != nil {
 		return nil, fmt.Errorf("nasa: get feed %s to %s: %w", start, end, err)
 	}
