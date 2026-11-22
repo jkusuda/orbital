@@ -1,0 +1,65 @@
+x-defaults: &defaults
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+services:
+  db:
+    <<: *defaults
+    image: postgres:17
+    environment:
+      POSTGRES_USER: orbital
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: orbital
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orbital -d orbital"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  migrate:
+    build: ./backend
+    entrypoint: ["goose", "-dir", "/migrations", "postgres", "postgres://orbital:${POSTGRES_PASSWORD}@db:5432/orbital?sslmode=disable", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  engine:
+    <<: *defaults
+    build:
+      context: .
+      dockerfile: engine/Dockerfile
+
+  api:
+    <<: *defaults
+    build: ./backend
+    environment:
+      NASA_API_KEY: ${NASA_API_KEY:?set NASA_API_KEY in .env}
+      DATABASE_URL: postgres://orbital:${POSTGRES_PASSWORD}@db:5432/orbital?sslmode=disable
+      ENGINE_ADDR: engine:50051
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      engine:
+        condition: service_started
+
+  web:
+    <<: *defaults
+    build: ./frontend
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - caddy_data:/data
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  caddy_data:

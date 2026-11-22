@@ -1,0 +1,7 @@
+.git
+.claude
+**/.env
+engine/build
+engine/.cache
+frontend/node_modules
+frontend/dist

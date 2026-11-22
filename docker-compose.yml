@@ -15,5 +15,34 @@ services:
       timeout: 3s
       retries: 5
 
+  migrate:
+    profiles: [app]
+    build: ./backend
+    entrypoint: ["goose", "-dir", "/migrations", "postgres", "${DATABASE_URL_DOCKER:-postgres://orbital:orbital@db:5432/orbital?sslmode=disable}", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  engine:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: engine/Dockerfile
+
+  api:
+    profiles: [app]
+    build: ./backend
+    env_file: backend/.env   # NASA_API_KEY
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER:-postgres://orbital:orbital@db:5432/orbital?sslmode=disable}
+      ENGINE_ADDR: engine:50051
+    ports:
+      - "8080:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      engine:
+        condition: service_started
+
 volumes:
   pgdata:
