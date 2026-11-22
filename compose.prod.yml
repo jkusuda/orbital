@@ -1,3 +1,8 @@
+# Deploy (images are built by GitHub Actions, see .github/workflows/ci.yml):
+#   docker compose -f compose.prod.yml pull
+#   docker compose -f compose.prod.yml up -d
+# On a bigger machine you can build locally instead: up -d --build
+
 x-defaults: &defaults
   restart: unless-stopped
   logging:
@@ -21,6 +26,7 @@ services:
       retries: 5
 
   migrate:
+    image: ghcr.io/jkusuda/orbital-api:latest
     build: ./backend
     entrypoint: ["goose", "-dir", "/migrations", "postgres", "postgres://orbital:${POSTGRES_PASSWORD}@db:5432/orbital?sslmode=disable", "up"]
     depends_on:
@@ -29,12 +35,14 @@ services:
 
   engine:
     <<: *defaults
+    image: ghcr.io/jkusuda/orbital-engine:latest
     build:
       context: .
       dockerfile: engine/Dockerfile
 
   api:
     <<: *defaults
+    image: ghcr.io/jkusuda/orbital-api:latest
     build: ./backend
     environment:
       NASA_API_KEY: ${NASA_API_KEY:?set NASA_API_KEY in .env}
@@ -48,6 +56,7 @@ services:
 
   web:
     <<: *defaults
+    image: ghcr.io/jkusuda/orbital-web:latest
     build: ./frontend
     environment:
       DOMAIN: ${DOMAIN:?set DOMAIN in .env}
