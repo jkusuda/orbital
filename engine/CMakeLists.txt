@@ -3,6 +3,7 @@ project(orbital_engine LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
@@ -30,3 +31,4 @@ protobuf_generate(TARGET engine_proto
 # Your program
 add_executable(engine src/main.cpp src/propagate.cpp)
 target_link_libraries(engine PRIVATE engine_proto)
+target_link_libraries(engine PRIVATE engine_proto gRPC::grpc++_reflection)

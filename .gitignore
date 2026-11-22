@@ -1,3 +1,4 @@
 .env
 .claude
 engine/build
+engine/.cache
