@@ -1,0 +1,37 @@
+syntax = "proto3";
+package orbital.v1;
+
+option go_package = "github.com/jkusuda/orbital/backend/internal/gen/orbitalv1;orbitalv1";
+
+message Elements {
+  double epoch_jd = 1;
+  double eccentricity = 2;
+  double semi_major_axis_au = 3;
+  double inclination_deg = 4;
+  double ascending_node_deg = 5;
+  double perihelion_arg_deg = 6;
+  double mean_anomaly_deg = 7;
+}
+
+message Vec3 {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message PropagateRequest {
+  repeated Elements asteroids = 1;
+  repeated double times_jd = 2;
+}
+
+message Trajectory {
+  repeated Vec3 points = 1;
+}
+
+message PropagateResponse {
+  repeated Trajectory trajectories = 1;
+}
+
+service PropagatorService {
+  rpc Propagate(PropagateRequest) returns (PropagateResponse);
+}

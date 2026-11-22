@@ -34,12 +34,8 @@ func (s *Server) Routes() http.Handler {
 	return mux
 }
 
-// approachingWindow is how far either side of the requested time an asteroid's
-// close approach can be for it to be shown.
 const approachingWindow = 7 * 24 * time.Hour
 
-// asteroidsApproaching loads asteroids with a close approach between from and to.
-// On failure it writes a 500 (logging the real error, not sending it) and returns false.
 func (s *Server) asteroidsApproaching(w http.ResponseWriter, r *http.Request, from, to time.Time) ([]store.Asteroid, bool) {
 	asteroids, err := s.store.AsteroidsApproaching(r.Context(), from, to)
 	if err != nil {
