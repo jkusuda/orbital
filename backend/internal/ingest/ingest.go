@@ -24,8 +24,8 @@ func New(client *nasa.Client, st *store.Store) *Ingester {
 
 func (in *Ingester) Refresh(ctx context.Context) error {
 	started := time.Now()
-	from := started.UTC().Format("2006-01-02")
-	to := started.UTC().AddDate(0, 0, feedDays-1).Format("2006-01-02")
+	from := started.UTC().Format(time.DateOnly)
+	to := started.UTC().AddDate(0, 0, feedDays-1).Format(time.DateOnly)
 
 	feed, err := in.nasa.GetFeed(ctx, from, to)
 	if err != nil {

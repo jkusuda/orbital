@@ -18,7 +18,7 @@ type Elements struct {
 type Vec3 struct{ X, Y, Z float64 }
 
 func Position(el Elements, t time.Time) Vec3 {
-	jd := julianDate(t)
+	jd := JulianDate(t)
 	M := meanAnomaly(el, jd)
 	E := solveKepler(M, el.Eccentricity)
 	x, y := orbitalPlane(el.SemiMajorAxis, el.Eccentricity, E)
@@ -28,7 +28,7 @@ func Position(el Elements, t time.Time) Vec3 {
 func degToRad(d float64) float64 { return d * math.Pi / 180 }
 
 // Internal steps
-func julianDate(t time.Time) float64 { // step 1
+func JulianDate(t time.Time) float64 { // step 1
 	return float64(t.Unix())/86400 + 2440587.5
 }
 
@@ -86,7 +86,7 @@ func rotate(x, y float64, el Elements) Vec3 {
 }
 
 func EarthPosition(t time.Time) Vec3 {
-	jd := julianDate(t)
+	jd := JulianDate(t)
 	T := (jd - 2451545.0) / 36525 // centuries since J2000
 
 	a := 1.00000261 + 0.00000562*T

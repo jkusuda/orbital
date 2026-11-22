@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <memory>
 #include <string>
 
@@ -32,7 +33,8 @@ class PropagatorImpl final : public ov1::PropagatorService::Service {
 };
 
 int main() {
-    const std::string addr = "0.0.0.0:50051";
+    const char* port = std::getenv("PORT");
+    const std::string addr = std::string("0.0.0.0:") + (port ? port : "50051");
     PropagatorImpl service;
 
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();

@@ -32,14 +32,19 @@ func (s *Server) handlePositions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pos, ok := s.propagate(w, r, asteroids, []time.Time{t})
+	if !ok {
+		return
+	}
+
 	earth := orbit.EarthPosition(t)
 	resp := positionsResponse{
 		Time:      t,
 		Sun:       vec(orbit.Vec3{}.Sub(earth)),
 		Positions: make([]asteroidPosition, 0, len(asteroids)),
 	}
-	for _, a := range asteroids {
-		p := orbit.Position(a.Elements, t).Sub(earth)
+	for j, a := range asteroids {
+		p := pos[j][0].Sub(earth)
 		resp.Positions = append(resp.Positions, asteroidPosition{
 			asteroidInfo: infoOf(a),
 			X:            p.X,

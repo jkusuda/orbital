@@ -6,16 +6,19 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jkusuda/orbital/backend/internal/engine"
+	"github.com/jkusuda/orbital/backend/internal/orbit"
 	"github.com/jkusuda/orbital/backend/internal/store"
 )
 
 // Server holds the dependencies
 type Server struct {
 	store *store.Store
+	prop  engine.Propagator
 }
 
-func NewServer(st *store.Store) *Server {
-	return &Server{store: st}
+func NewServer(st *store.Store, prop engine.Propagator) *Server {
+	return &Server{store: st, prop: prop}
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +47,20 @@ func (s *Server) asteroidsApproaching(w http.ResponseWriter, r *http.Request, fr
 		return nil, false
 	}
 	return asteroids, true
+}
+
+func (s *Server) propagate(w http.ResponseWriter, r *http.Request, asteroids []store.Asteroid, times []time.Time) ([][]orbit.Vec3, bool) {
+	els := make([]orbit.Elements, len(asteroids))
+	for j, a := range asteroids {
+		els[j] = a.Elements
+	}
+	pos, err := s.prop.Propagate(r.Context(), els, times)
+	if err != nil {
+		log.Printf("%s: %v", r.URL.Path, err)
+		writeError(w, http.StatusInternalServerError, "could not compute positions")
+		return nil, false
+	}
+	return pos, true
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {

@@ -4,10 +4,6 @@ async function get(path, params) {
   return res.json();
 }
 
-export function fetchPositions(time = new Date()) {
-  return get('positions', { time: time.toISOString() });
-}
-
 export function fetchTrajectories({ start, end, step }) {
   return get('trajectories', { start: start.toISOString(), end: end.toISOString(), step });
 }

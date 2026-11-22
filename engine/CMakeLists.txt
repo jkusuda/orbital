@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Without a build type CMake compiles with no optimization, which would make
+# the C++ engine look slow in benchmarks for no real reason.
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+
 find_package(Protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
@@ -30,5 +36,4 @@ protobuf_generate(TARGET engine_proto
 
 # Your program
 add_executable(engine src/main.cpp src/propagate.cpp)
-target_link_libraries(engine PRIVATE engine_proto)
 target_link_libraries(engine PRIVATE engine_proto gRPC::grpc++_reflection)

@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/jkusuda/orbital/backend/internal/api"
+	"github.com/jkusuda/orbital/backend/internal/engine"
 	"github.com/jkusuda/orbital/backend/internal/ingest"
 	"github.com/jkusuda/orbital/backend/internal/nasa"
 	"github.com/jkusuda/orbital/backend/internal/store"
@@ -41,9 +42,20 @@ func main() {
 	}
 	defer st.Close()
 
+	var prop engine.Propagator = engine.Local{}
+	if addr := os.Getenv("ENGINE_ADDR"); addr != "" {
+		g, err := engine.NewGRPC(addr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer g.Close()
+		prop = g
+		log.Printf("using C++ engine at %s", addr)
+	}
+
 	go refreshLoop(ctx, ingest.New(nasa.NewClient(key), st), refreshEvery)
 
-	httpSrv := &http.Server{Addr: ":" + port, Handler: api.NewServer(st).Routes()}
+	httpSrv := &http.Server{Addr: ":" + port, Handler: api.NewServer(st, prop).Routes()}
 	go func() {
 		<-ctx.Done()
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

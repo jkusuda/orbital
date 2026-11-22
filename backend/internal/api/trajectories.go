@@ -54,8 +54,17 @@ func (s *Server) handleTrajectories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	times := make([]time.Time, n)
+	for i := range n {
+		times[i] = start.Add(time.Duration(i) * step)
+	}
+	pos, ok := s.propagate(w, r, asteroids, times)
+	if !ok {
+		return
+	}
+
 	resp := trajectoriesResponse{
-		Times:     make([]time.Time, n),
+		Times:     times,
 		Sun:       make([][3]float64, n),
 		Asteroids: make([]asteroidTrajectory, len(asteroids)),
 	}
@@ -66,13 +75,11 @@ func (s *Server) handleTrajectories(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	for i := range n {
-		t := start.Add(time.Duration(i) * step)
+	for i, t := range times {
 		earth := orbit.EarthPosition(t)
-		resp.Times[i] = t
 		resp.Sun[i] = vec(orbit.Vec3{}.Sub(earth))
-		for j, a := range asteroids {
-			resp.Asteroids[j].Points[i] = vec(orbit.Position(a.Elements, t).Sub(earth))
+		for j := range asteroids {
+			resp.Asteroids[j].Points[i] = vec(pos[j][i].Sub(earth))
 		}
 	}
 	writeJSON(w, http.StatusOK, resp)
